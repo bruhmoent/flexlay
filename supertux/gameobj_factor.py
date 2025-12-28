@@ -133,12 +133,17 @@ class SuperTuxGameObjFactory:
         brushes = []
         for identifier, (sprite_path, constructor) in self.objects.items():
             if sprite_path is not None:
-                supertux_sprite = SuperTuxSprite.from_file(os.path.join(Config.current.datadir, sprite_path))
-                assert supertux_sprite is not None
-                sprite = supertux_sprite.get_sprite()
-                assert sprite is not None
-                brush = ObjectBrush(sprite, identifier)
-                brushes.append(brush)
+                try:
+                    supertux_sprite = SuperTuxSprite.from_file(os.path.join(Config.current.datadir, sprite_path))
+                    assert supertux_sprite is not None
+                    sprite = supertux_sprite.get_sprite()
+                    if sprite is not None:
+                        brush = ObjectBrush(sprite, identifier)
+                        brushes.append(brush)
+                    else:
+                        logging.warning("Failed to load for %s", identifier)
+                except Exception as e:
+                    logging.error("Failed to load brush for %s: %s", identifier, e)
         return brushes
 
     def add_object(self, gameobj_class: Type[GameObj]) -> None:
